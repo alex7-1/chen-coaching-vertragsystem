@@ -169,7 +169,7 @@
       <div class="sec-label">Weitere Angaben</div>
       <div class="fg fg2">
         <div class="field"><label>Personalausweisnummer <span class="req">*</span></label><input id="tp_ausweis" placeholder="L01X00T47" style="font-family:'DM Mono',monospace;font-size:13px"><div class="ferr" id="e-tp_ausweis">Pflichtfeld</div></div>
-        <div class="field"><label>MAK-Nummer Tippgeber <span class="req">*</span></label><input id="tp_mak_nr" placeholder="MAK999888" style="font-family:'DM Mono',monospace;font-size:13px"><div class="ferr" id="e-tp_mak_nr">Pflichtfeld</div></div>
+        <div class="field"><label>MAK-Nummer Tippgeber <span class="opt">(optional)</span></label><input id="tp_mak_nr" placeholder="MAK999888" style="font-family:'DM Mono',monospace;font-size:13px"><div class="ferr" id="e-tp_mak_nr">Pflichtfeld</div></div>
       </div>
     </div>
 
@@ -198,7 +198,7 @@
         <div><div class="card-title">Bankverbindung des Tippgebers</div><div class="card-sub">Wird im Formular „Bankverbindung auf Dritten" eingetragen</div></div>
       </div>
       <div class="fg">
-        <div class="field"><label>IBAN <span class="req">*</span></label><input id="tp_iban" placeholder="DE00 0000 0000 0000 0000 00" style="font-family:'DM Mono',monospace;font-size:13px" oninput="fmtIBAN(this)"><div class="ferr" id="e-tp_iban">Gültige IBAN erforderlich</div></div>
+        <div class="field"><label>IBAN <span class="req">*</span></label><input id="tp_iban" placeholder="DE00 0000 0000 0000 0000 00" style="font-family:'DM Mono',monospace;font-size:13px" oninput="fmtIBAN(this)" onblur="autoFillBIC(this)"><div class="ferr" id="e-tp_iban">Gültige IBAN erforderlich</div></div>
       </div>
       <div class="fg fg2" style="margin-top:14px">
         <div class="field"><label>BIC <span class="req">*</span></label><input id="tp_bic" placeholder="COBADEFFXXX" style="font-family:'DM Mono',monospace;font-size:13px" oninput="this.value=this.value.toUpperCase()"><div class="ferr" id="e-tp_bic">Pflichtfeld</div></div>
@@ -296,14 +296,14 @@
 // ── HIER DIE RAILWAY URL EINTRAGEN ──────────────────
 // Nach dem Deployment auf Railway die URL ersetzen:
 // z.B. https://chen-coaching.up.railway.app
-const API_URL = "https://web-production-c32362.up.railway.app";
+const API_URL = "DEINE_RAILWAY_URL_HIER";
 // ────────────────────────────────────────────────────
 
 let cur = 1;
 let lastBlob = null;
 
 const REQ = {
-  1: ['tp_vorname','tp_nachname','tp_strasse','tp_plz','tp_ort','tp_ausweis','tp_mak_nr','datum','ort_datum'],
+  1: ['tp_vorname','tp_nachname','tp_strasse','tp_plz','tp_ort','tp_ausweis','datum','ort_datum'],
   2: ['tp_iban','tp_bic','tp_geldinstitut','tp_steuernummer']
 };
 
@@ -312,6 +312,36 @@ document.getElementById('datum').value = new Date().toISOString().split('T')[0];
 function fmtIBAN(el) {
   let v = el.value.replace(/\s/g,'').toUpperCase();
   el.value = v.match(/.{1,4}/g)?.join(' ') || v;
+}
+
+async function autoFillBIC(el) {
+  const iban = el.value.replace(/\s/g,'').toUpperCase();
+  if (iban.length < 15) return;
+  const bicEl = document.getElementById('tp_bic');
+  const bankEl = document.getElementById('tp_geldinstitut');
+  const ibanErr = document.getElementById('e-tp_iban');
+  bicEl.placeholder = 'Wird gesucht…';
+  try {
+    const res = await fetch(`${API_URL}/lookup-iban`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({iban})
+    });
+    const data = await res.json();
+    if (data.valid) {
+      if (data.bic && !bicEl.value)   bicEl.value  = data.bic;
+      if (data.name && !bankEl.value) bankEl.value = data.name;
+      el.classList.remove('err');
+      if (ibanErr) ibanErr.style.display = 'none';
+      bicEl.placeholder = 'COBADEFFXXX';
+    } else {
+      el.classList.add('err');
+      if (ibanErr) { ibanErr.textContent = 'IBAN ungültig'; ibanErr.style.display = 'block'; }
+      bicEl.placeholder = 'BIC *';
+    }
+  } catch(e) {
+    bicEl.placeholder = 'COBADEFFXXX';
+  }
 }
 
 function val(id) {
