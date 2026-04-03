@@ -7,6 +7,7 @@ import os
 import urllib.request
 from pathlib import Path
 from pypdf import PdfReader, PdfWriter
+from pypdf.generic import NameObject, BooleanObject
 from reportlab.pdfgen import canvas
 
 app = Flask(__name__)
@@ -41,6 +42,11 @@ def fill_fillable(src_path, fields):
                 writer.update_page_form_field_values(page, fields, auto_regenerate=False)
             except Exception:
                 pass
+    # NeedAppearances: PDF-Viewer soll Felder neu rendern (wichtig für Comb-Felder wie IBAN/BIC)
+    if "/AcroForm" in writer._root_object:
+        writer._root_object["/AcroForm"].update(
+            {NameObject("/NeedAppearances"): BooleanObject(True)}
+        )
     buf = io.BytesIO()
     writer.write(buf)
     buf.seek(0)
