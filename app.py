@@ -96,8 +96,10 @@ def make_05(d):
         "PLZ Ort Tippgeber": d["tp_plz_ort"],
         "Personalausweisnummer": d["tp_ausweis"],
         "Prozent der Abschlussprovision": d.get("provision_pct", ""),
-        "Ort": d["ort_datum"], "Datum": d["datum"],
-        "Ort_2": d["ort_datum"], "Datum_2": d["datum"],
+        "Ort":  d["ort_datum"],   # Makler (Chen Coaching)
+        "Datum": d["datum"],
+        "Ort_2":  d["tp_ort"],    # Tippgeber
+        "Datum_2": d["datum"],
     })
 
 def make_06(d):
@@ -107,7 +109,8 @@ def make_06(d):
     })
 
 def make_03(d):
-    return fill_fillable(PDFS["03"], {
+    # Schritt 1: AcroForm-Felder füllen
+    pdf_bytes = fill_fillable(PDFS["03"], {
         "MAK-Konto": FIXED["mak_nr"],
         "Name Vorname  Firmenname": f"{d['tp_vorname']} {d['tp_nachname']}",
         "Straße Hausnummer": d["tp_strasse"],
@@ -116,12 +119,38 @@ def make_03(d):
         "IBAN": d["tp_iban"], "BIC": d["tp_bic"],
         "Geldinstitut": d["tp_geldinstitut"],
         "Steuernummer": d["tp_steuernummer"],
-        "Ort": d["ort_datum"], "Datum": d["datum"],
-        "Ort_2": d["ort_datum"], "Datum_2": d["datum"],
+        "Ort":   d["ort_datum"],
+        "Datum": d["datum"],
+        "Ort_2":  d["tp_ort"],
+        "Datum_2": d["datum"],
         "Straße Hausnummer Tippgeber": d["tp_strasse"],
         "PLZ Ort Tippgeber": d["tp_plz_ort"],
-        "Datum_3": d["datum"], "Ort_3": d["ort_datum"],
+        "Datum_3": d["datum"],
+        "Ort_3":   d["tp_ort"],
     })
+    # Schritt 2: Seite 2 – Name/Vorname Tippgeber per Overlay einfügen
+    # pdfplumber top=112.4 → PDF y = 841.9 - 112.4 - 2 = 727
+    page_h = 841.9
+    tmp_path = io.BytesIO(pdf_bytes)
+    reader = PdfReader(tmp_path)
+    writer = PdfWriter()
+    for i, page in enumerate(reader.pages):
+        if i == 1:  # Seite 2
+            packet = io.BytesIO()
+            pw = float(page.mediabox.width)
+            ph = float(page.mediabox.height)
+            c = canvas.Canvas(packet, pagesize=(pw, ph))
+            c.setFont("Helvetica", 10)
+            c.drawString(48, page_h - 112.4 - 10, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.save()
+            packet.seek(0)
+            overlay = PdfReader(packet)
+            page.merge_page(overlay.pages[0])
+        writer.add_page(page)
+    buf = io.BytesIO()
+    writer.write(buf)
+    buf.seek(0)
+    return buf.read()
 
 def make_02(d):
     page_h = 841.9
