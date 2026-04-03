@@ -13,11 +13,11 @@ CORS(app)
 BASE_DIR = Path(__file__).parent
 
 PDFS = {
-    "02": BASE_DIR / "02_Vertriebspartnervertrag_Chen_Coaching.pdf",
-    "03": BASE_DIR / "03_FF-Formular_Bankverbindung.pdf",
-    "04": BASE_DIR / "04_FF_Sicherungsabtretung.pdf",
-    "05": BASE_DIR / "05_FF_Tippgebervertrag.pdf",
-    "06": BASE_DIR / "06_FF_Vertriebsregulatorik.pdf",
+    "02": BASE_DIR / "02 Vertriebspartnervertrag Chen Coaching.pdf",
+"03": BASE_DIR / "03 FF-Formular_Änderung der Bankverbindung auf Dritten_OKT_2025_DIGI.pdf",
+"04": BASE_DIR / "04 FF_Sicherungsabtretung_2025_DIGI_04 1 Kopie.pdf",
+"05": BASE_DIR / "05 FF_Tippgebervertrag_2025_DIGI 1.pdf",
+"06": BASE_DIR / "06 FF_Vertriebsregulatorik.pdf",
 }
 
 FIXED = {
