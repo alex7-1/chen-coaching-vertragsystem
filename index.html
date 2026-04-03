@@ -296,7 +296,7 @@
 // ── HIER DIE RAILWAY URL EINTRAGEN ──────────────────
 // Nach dem Deployment auf Railway die URL ersetzen:
 // z.B. https://chen-coaching.up.railway.app
-const API_URL = "https://web-production-c32362.up.railway.app";
+const API_URL = "DEINE_RAILWAY_URL_HIER";
 // ────────────────────────────────────────────────────
 
 let cur = 1;
@@ -391,7 +391,7 @@ function fillReview() {
   document.getElementById('rv-ausweis').textContent = val('tp_ausweis');
   document.getElementById('rv-mak').textContent     = val('tp_mak_nr');
   const d = val('datum');
-  const df = d ? new Date(d).toLocaleDateString('de-DE') : '—';
+  const df = d ? (() => { const dt = new Date(d); const dd = String(dt.getDate()).padStart(2,'0'); const mm = String(dt.getMonth()+1).padStart(2,'0'); const yyyy = dt.getFullYear(); return `${dd}.${mm}.${yyyy}`; })() : '—';
   document.getElementById('rv-datum').textContent   = `${df} / ${val('ort_datum')}`;
   const p = val('provision_pct');
   document.getElementById('rv-prov').textContent    = p ? p+' %' : '— (nicht angegeben)';
@@ -402,7 +402,7 @@ function fillReview() {
 
 function buildPayload() {
   const d = val('datum');
-  const df = d ? new Date(d).toLocaleDateString('de-DE') : '';
+  const df = d ? (() => { const dt = new Date(d); const dd = String(dt.getDate()).padStart(2,'0'); const mm = String(dt.getMonth()+1).padStart(2,'0'); const yyyy = dt.getFullYear(); return `${dd}.${mm}.${yyyy}`; })() : '';
   return {
     tp_vorname: val('tp_vorname'), tp_nachname: val('tp_nachname'),
     tp_strasse: val('tp_strasse'),
