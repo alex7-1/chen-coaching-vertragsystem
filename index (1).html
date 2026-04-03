@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chen Coaching – Vertragsformular</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F5F3EE; --surface: #FFFFFF; --border: #E2DDD6;
+    --text: #1A1916; --muted: #7A766E;
+    --accent: #1A5276; --accent-light: #EAF1F8;
+    --success: #1A6644; --success-bg: #EAF5EE;
+    --error: #991B1B; --error-bg: #FEF2F2;
+    --radius: 10px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 18px 40px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+  .logo { width: 34px; height: 34px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  header h1 { font-size: 15px; font-weight: 500; }
+  header h1 span { color: var(--muted); font-weight: 300; }
+  .chip { margin-left: auto; font-size: 12px; padding: 3px 10px; border-radius: 20px; background: var(--accent-light); color: var(--accent); font-weight: 500; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 36px 20px 0; }
+
+  .progress-bar { display: flex; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: var(--surface); margin-bottom: 36px; }
+  .progress-step { flex: 1; padding: 11px 14px; font-size: 13px; color: var(--muted); cursor: pointer; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 7px; user-select: none; transition: background 0.15s; }
+  .progress-step:last-child { border-right: none; }
+  .progress-step.active { background: var(--accent); color: white; }
+  .progress-step.done { background: var(--accent-light); color: var(--accent); }
+  .sn { width: 19px; height: 19px; border-radius: 50%; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+  .progress-step.active .sn { background: rgba(255,255,255,0.25); }
+  .progress-step.done .sn { background: var(--accent); color: white; font-size: 10px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 30px; margin-bottom: 18px; }
+  .card-head { display: flex; align-items: center; gap: 11px; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .card-ico { width: 30px; height: 30px; background: var(--accent-light); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card-title { font-size: 14px; font-weight: 500; }
+  .card-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .fixed-banner { background: var(--accent-light); border: 1px solid #B8D4E8; border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; display: flex; gap: 10px; }
+  .fixed-banner-text { font-size: 13px; color: var(--accent); line-height: 1.6; }
+  .fixed-banner-text strong { display: block; margin-bottom: 2px; font-weight: 500; }
+
+  .fg { display: grid; gap: 14px; }
+  .fg2 { grid-template-columns: 1fr 1fr; }
+  .fg3 { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  label .req { color: #C0392B; margin-left: 2px; }
+  label .opt { font-size: 11px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.7; }
+  input { height: 38px; padding: 0 11px; border: 1px solid var(--border); border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--surface); outline: none; width: 100%; transition: border-color 0.15s, box-shadow 0.15s; }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,82,118,0.1); }
+  input::placeholder { color: #C0BAB0; }
+  input.err { border-color: #E74C3C; }
+  .ferr { font-size: 12px; color: var(--error); margin-top: 2px; display: none; }
+
+  .sec-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin: 22px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  .nav-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .btn { height: 38px; padding: 0 18px; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-sec { background: var(--surface); color: var(--muted); }
+  .btn-sec:hover { background: var(--bg); }
+  .btn-pri { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-pri:hover { background: #154360; }
+  .btn-dl { background: var(--success); color: white; border-color: var(--success); height: 44px; padding: 0 28px; font-size: 15px; }
+  .btn-dl:hover { background: #145A32; }
+  .btn-dl:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .rv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rv-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+  .rv-table td { padding: 9px 0; vertical-align: top; }
+  .rv-table td:first-child { color: var(--muted); width: 40%; padding-right: 12px; }
+  .rv-table td:last-child { font-family: 'DM Mono', monospace; font-size: 12px; }
+  .rv-head { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); padding: 14px 0 7px; border-bottom: 1px solid var(--border); }
+
+  .doc-list { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .doc-item { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--bg); }
+  .doc-name { flex: 1; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .badge-pending { background: #F0EDE6; color: var(--muted); }
+  .badge-ok { background: var(--success-bg); color: var(--success); }
+  .badge-err { background: var(--error-bg); color: var(--error); }
+
+  /* Generate step */
+  .gen-center { text-align: center; padding: 40px 20px; }
+  .gen-icon { font-size: 38px; display: block; margin-bottom: 14px; }
+  .gen-title { font-size: 19px; font-weight: 500; margin-bottom: 8px; }
+  .gen-sub { font-size: 13px; color: var(--muted); margin-bottom: 26px; line-height: 1.6; }
+
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.35); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .alert { padding: 12px 15px; border-radius: 8px; font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
+  .alert-info { background: var(--accent-light); border: 1px solid #B8D4E8; color: var(--accent); }
+
+  .success-box { background: var(--success-bg); border: 1px solid #A8D5BC; border-radius: var(--radius); padding: 20px 24px; text-align: center; }
+  .success-box .big { font-size: 32px; display: block; margin-bottom: 10px; }
+  .success-box h3 { font-size: 17px; font-weight: 500; color: var(--success); margin-bottom: 6px; }
+  .success-box p { font-size: 13px; color: #2E7D52; }
+
+  @media (max-width: 580px) {
+    header { padding: 14px 16px; }
+    .container { padding: 20px 14px 0; }
+    .card { padding: 18px 16px; }
+    .fg2, .fg3 { grid-template-columns: 1fr; }
+    .progress-step span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CC</div>
+  <h1>Chen Coaching <span>/ Vertragsformular</span></h1>
+  <div class="chip">Intern</div>
+</header>
+
+<div class="container">
+
+  <div class="progress-bar">
+    <div class="progress-step active" id="tab-1" onclick="goTo(1)">
+      <div class="sn">1</div><span>Tippgeber</span>
+    </div>
+    <div class="progress-step" id="tab-2" onclick="goTo(2)">
+      <div class="sn">2</div><span>Bankdaten</span>
+    </div>
+    <div class="progress-step" id="tab-3" onclick="goTo(3)">
+      <div class="sn">3</div><span>Prüfen</span>
+    </div>
+    <div class="progress-step" id="tab-4" onclick="goTo(4)">
+      <div class="sn">4</div><span>Erstellen</span>
+    </div>
+  </div>
+
+  <!-- ── Schritt 1 ── -->
+  <div class="step-panel active" id="step-1">
+    <div class="fixed-banner">
+      <div style="font-size:15px;margin-top:1px">🔒</div>
+      <div class="fixed-banner-text">
+        <strong>Automatisch vorausgefüllt</strong>
+        Chen Coaching FDL GmbH · Spaldingstraße 210, 20097 Hamburg · MAK194317
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-ico">👤</div>
+        <div><div class="card-title">Persönliche Daten des Tippgebers</div><div class="card-sub">Angaben zur Person des neuen Vertriebspartners</div></div>
+      </div>
+      <div class="fg fg2">
+        <div class="field"><label>Vorname <span class="req">*</span></label><input id="tp_vorname" placeholder="Max"><div class="ferr" id="e-tp_vorname">Pflichtfeld</div></div>
+        <div class="field"><label>Nachname <span class="req">*</span></label><input id="tp_nachname" placeholder="Mustermann"><div class="ferr" id="e-tp_nachname">Pflichtfeld</div></div>
+      </div>
+      <div class="sec-label">Adresse</div>
+      <div class="fg">
+        <div class="field"><label>Straße + Hausnummer <span class="req">*</span></label><input id="tp_strasse" placeholder="Musterstraße 5"><div class="ferr" id="e-tp_strasse">Pflichtfeld</div></div>
+      </div>
+      <div class="fg fg2" style="margin-top:14px">
+        <div class="field"><label>PLZ <span class="req">*</span></label><input id="tp_plz" placeholder="20095" maxlength="5"><div class="ferr" id="e-tp_plz">Pflichtfeld</div></div>
+        <div class="field"><label>Ort <span class="req">*</span></label><input id="tp_ort" placeholder="Hamburg"><div class="ferr" id="e-tp_ort">Pflichtfeld</div></div>
+      </div>
+      <div class="sec-label">Weitere Angaben</div>
+      <div class="fg fg2">
+        <div class="field"><label>Personalausweisnummer <span class="req">*</span></label><input id="tp_ausweis" placeholder="L01X00T47" style="font-family:'DM Mono',monospace;font-size:13px"><div class="ferr" id="e-tp_ausweis">Pflichtfeld</div></div>
+        <div class="field"><label>MAK-Nummer Tippgeber <span class="req">*</span></label><input id="tp_mak_nr" placeholder="MAK999888" style="font-family:'DM Mono',monospace;font-size:13px"><div class="ferr" id="e-tp_mak_nr">Pflichtfeld</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-ico">📋</div>
+        <div><div class="card-title">Vertragsdaten</div><div class="card-sub">Datum und Ort der Unterzeichnung</div></div>
+      </div>
+      <div class="fg fg3">
+        <div class="field"><label>Datum <span class="req">*</span></label><input type="date" id="datum"><div class="ferr" id="e-datum">Pflichtfeld</div></div>
+        <div class="field"><label>Ort <span class="req">*</span></label><input id="ort_datum" value="HH" placeholder="HH"></div>
+        <div class="field"><label>Provisionssatz <span class="opt">(optional)</span></label><input id="provision_pct" placeholder="z.B. 50"></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-pri" onclick="next(1)">Weiter zu Bankdaten →</button>
+    </div>
+  </div>
+
+  <!-- ── Schritt 2 ── -->
+  <div class="step-panel" id="step-2">
+    <div class="alert alert-info">Alle Bankangaben beziehen sich auf den <strong>Tippgeber</strong> als Kontoinhaber — nicht auf Chen Coaching.</div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-ico">🏦</div>
+        <div><div class="card-title">Bankverbindung des Tippgebers</div><div class="card-sub">Wird im Formular „Bankverbindung auf Dritten" eingetragen</div></div>
+      </div>
+      <div class="fg">
+        <div class="field"><label>IBAN <span class="req">*</span></label><input id="tp_iban" placeholder="DE00 0000 0000 0000 0000 00" style="font-family:'DM Mono',monospace;font-size:13px" oninput="fmtIBAN(this)"><div class="ferr" id="e-tp_iban">Gültige IBAN erforderlich</div></div>
+      </div>
+      <div class="fg fg2" style="margin-top:14px">
+        <div class="field"><label>BIC <span class="req">*</span></label><input id="tp_bic" placeholder="COBADEFFXXX" style="font-family:'DM Mono',monospace;font-size:13px" oninput="this.value=this.value.toUpperCase()"><div class="ferr" id="e-tp_bic">Pflichtfeld</div></div>
+        <div class="field"><label>Geldinstitut <span class="req">*</span></label><input id="tp_geldinstitut" placeholder="Commerzbank"><div class="ferr" id="e-tp_geldinstitut">Pflichtfeld</div></div>
+      </div>
+      <div class="sec-label">Steuer</div>
+      <div class="fg fg2">
+        <div class="field"><label>Steuernummer <span class="req">*</span></label><input id="tp_steuernummer" placeholder="48/123/45678" style="font-family:'DM Mono',monospace;font-size:13px"><div class="ferr" id="e-tp_steuernummer">Pflichtfeld</div></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-sec" onclick="goTo(1)">← Zurück</button>
+      <button class="btn btn-pri" onclick="next(2)">Weiter zur Prüfung →</button>
+    </div>
+  </div>
+
+  <!-- ── Schritt 3 ── -->
+  <div class="step-panel" id="step-3">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-ico">🔍</div>
+        <div><div class="card-title">Alle Angaben prüfen</div><div class="card-sub">Bitte vor der Erstellung nochmals kontrollieren</div></div>
+      </div>
+      <table class="rv-table">
+        <tr><td colspan="2" class="rv-head">Tippgeber – Persönliche Daten</td></tr>
+        <tr><td>Name</td><td id="rv-name">—</td></tr>
+        <tr><td>Adresse</td><td id="rv-addr">—</td></tr>
+        <tr><td>Personalausweis</td><td id="rv-ausweis">—</td></tr>
+        <tr><td>MAK-Nummer</td><td id="rv-mak">—</td></tr>
+        <tr><td colspan="2" class="rv-head">Vertragsdaten</td></tr>
+        <tr><td>Datum / Ort</td><td id="rv-datum">—</td></tr>
+        <tr><td>Provisionssatz</td><td id="rv-prov">—</td></tr>
+        <tr><td colspan="2" class="rv-head">Bankverbindung (Tippgeber)</td></tr>
+        <tr><td>IBAN</td><td id="rv-iban">—</td></tr>
+        <tr><td>BIC / Bank</td><td id="rv-bic">—</td></tr>
+        <tr><td>Steuernummer</td><td id="rv-steuernr">—</td></tr>
+        <tr><td colspan="2" class="rv-head">Fest vorausgefüllt (Chen Coaching)</td></tr>
+        <tr><td>Firma</td><td>Chen Coaching FDL GmbH</td></tr>
+        <tr><td>Adresse</td><td>Spaldingstraße 210, 20097 Hamburg</td></tr>
+        <tr><td>MAK-Nummer</td><td>MAK194317</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-ico">📄</div>
+        <div><div class="card-title">Zu generierende Dokumente</div><div class="card-sub">5 Formulare werden ausgefüllt und als ZIP heruntergeladen</div></div>
+      </div>
+      <div class="doc-list">
+        <div class="doc-item"><span>📝</span><span class="doc-name">02 · Vertriebspartnervertrag</span><span class="badge badge-pending">Bereit</span></div>
+        <div class="doc-item"><span>📝</span><span class="doc-name">03 · Bankverbindung auf Dritten</span><span class="badge badge-pending">Bereit</span></div>
+        <div class="doc-item"><span>📝</span><span class="doc-name">04 · Sicherungsabtretung</span><span class="badge badge-pending">Bereit</span></div>
+        <div class="doc-item"><span>📝</span><span class="doc-name">05 · Tippgebervertrag</span><span class="badge badge-pending">Bereit</span></div>
+        <div class="doc-item"><span>📝</span><span class="doc-name">06 · Vertriebsregulatorik</span><span class="badge badge-pending">Bereit</span></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-sec" onclick="goTo(2)">← Zurück</button>
+      <button class="btn btn-pri" onclick="goTo(4)">Jetzt erstellen →</button>
+    </div>
+  </div>
+
+  <!-- ── Schritt 4 ── -->
+  <div class="step-panel" id="step-4">
+    <div class="card" id="gen-card">
+      <div class="gen-center">
+        <span class="gen-icon">📋</span>
+        <div class="gen-title" id="gen-title">Bereit zur Erstellung</div>
+        <div class="gen-sub" id="gen-sub">Alle 5 Formulare werden ausgefüllt und als ZIP-Datei heruntergeladen.</div>
+        <button class="btn btn-dl" id="btn-gen" onclick="generate()">
+          PDF-Pakete generieren & herunterladen
+        </button>
+      </div>
+    </div>
+    <div id="gen-result" style="display:none">
+      <div class="success-box">
+        <span class="big">✅</span>
+        <h3 id="res-title">Dokumente erstellt!</h3>
+        <p id="res-sub">Der Download startet automatisch.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+        <button class="btn btn-dl" id="btn-redownload" style="font-size:13px;height:38px;padding:0 20px">
+          ↓ Nochmals herunterladen
+        </button>
+        <button class="btn btn-sec" onclick="resetForm()">↺ Neuer Tippgeber</button>
+      </div>
+    </div>
+    <div class="nav-row" id="back-4">
+      <button class="btn btn-sec" onclick="goTo(3)">← Zurück zur Prüfung</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── HIER DIE RAILWAY URL EINTRAGEN ──────────────────
+// Nach dem Deployment auf Railway die URL ersetzen:
+// z.B. https://chen-coaching.up.railway.app
+const API_URL = "DEINE_RAILWAY_URL_HIER";
+// ────────────────────────────────────────────────────
+
+let cur = 1;
+let lastBlob = null;
+
+const REQ = {
+  1: ['tp_vorname','tp_nachname','tp_strasse','tp_plz','tp_ort','tp_ausweis','tp_mak_nr','datum','ort_datum'],
+  2: ['tp_iban','tp_bic','tp_geldinstitut','tp_steuernummer']
+};
+
+document.getElementById('datum').value = new Date().toISOString().split('T')[0];
+
+function fmtIBAN(el) {
+  let v = el.value.replace(/\s/g,'').toUpperCase();
+  el.value = v.match(/.{1,4}/g)?.join(' ') || v;
+}
+
+function val(id) {
+  const v = document.getElementById(id)?.value.trim() || '';
+  return id === 'tp_iban' ? v.replace(/\s/g,'') : v;
+}
+
+function validate(step) {
+  let ok = true;
+  (REQ[step]||[]).forEach(id => {
+    const el = document.getElementById(id);
+    const err = document.getElementById('e-'+id);
+    if (!val(id)) {
+      el?.classList.add('err');
+      if(err) err.style.display='block';
+      ok = false;
+    } else {
+      el?.classList.remove('err');
+      if(err) err.style.display='none';
+    }
+  });
+  return ok;
+}
+
+function goTo(n) {
+  document.getElementById('step-'+cur).classList.remove('active');
+  const oldTab = document.getElementById('tab-'+cur);
+  oldTab.classList.remove('active');
+  if(n > cur) oldTab.classList.add('done');
+  else oldTab.classList.remove('done');
+  cur = n;
+  document.getElementById('step-'+n).classList.add('active');
+  const newTab = document.getElementById('tab-'+n);
+  newTab.classList.add('active');
+  newTab.classList.remove('done');
+  if(n===3) fillReview();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function next(from) {
+  if(validate(from)) goTo(from+1);
+}
+
+function fillReview() {
+  document.getElementById('rv-name').textContent    = `${val('tp_vorname')} ${val('tp_nachname')}`;
+  document.getElementById('rv-addr').textContent    = `${val('tp_strasse')}, ${val('tp_plz')} ${val('tp_ort')}`;
+  document.getElementById('rv-ausweis').textContent = val('tp_ausweis');
+  document.getElementById('rv-mak').textContent     = val('tp_mak_nr');
+  const d = val('datum');
+  const df = d ? new Date(d).toLocaleDateString('de-DE') : '—';
+  document.getElementById('rv-datum').textContent   = `${df} / ${val('ort_datum')}`;
+  const p = val('provision_pct');
+  document.getElementById('rv-prov').textContent    = p ? p+' %' : '— (nicht angegeben)';
+  document.getElementById('rv-iban').textContent    = document.getElementById('tp_iban').value.trim();
+  document.getElementById('rv-bic').textContent     = `${val('tp_bic')} / ${val('tp_geldinstitut')}`;
+  document.getElementById('rv-steuernr').textContent= val('tp_steuernummer');
+}
+
+function buildPayload() {
+  const d = val('datum');
+  const df = d ? new Date(d).toLocaleDateString('de-DE') : '';
+  return {
+    tp_vorname: val('tp_vorname'), tp_nachname: val('tp_nachname'),
+    tp_strasse: val('tp_strasse'),
+    tp_plz: val('tp_plz'), tp_ort: val('tp_ort'),
+    tp_plz_ort: `${val('tp_plz')} ${val('tp_ort')}`,
+    tp_ausweis: val('tp_ausweis'), tp_mak_nr: val('tp_mak_nr'),
+    tp_iban: val('tp_iban'), tp_bic: val('tp_bic'),
+    tp_geldinstitut: val('tp_geldinstitut'), tp_steuernummer: val('tp_steuernummer'),
+    datum: df, ort_datum: val('ort_datum'), provision_pct: val('provision_pct')
+  };
+}
+
+async function generate() {
+  const btn = document.getElementById('btn-gen');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Wird erstellt…';
+  document.getElementById('gen-title').textContent = 'PDFs werden generiert…';
+  document.getElementById('gen-sub').textContent   = 'Bitte warten, das dauert einige Sekunden.';
+
+  try {
+    const payload = buildPayload();
+    const res = await fetch(`${API_URL}/generate`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Serverfehler');
+    }
+
+    const blob = await res.blob();
+    lastBlob = blob;
+    const name = `${payload.tp_nachname}_${payload.tp_vorname}_Vertragsunterlagen.zip`;
+    triggerDownload(blob, name);
+
+    document.getElementById('gen-card').style.display = 'none';
+    document.getElementById('gen-result').style.display = 'block';
+    document.getElementById('back-4').style.display = 'none';
+    document.getElementById('res-title').textContent = `Fertig: ${payload.tp_vorname} ${payload.tp_nachname}`;
+    document.getElementById('res-sub').textContent   = `${name} wird heruntergeladen.`;
+
+    document.getElementById('btn-redownload').onclick = () => triggerDownload(lastBlob, name);
+    [1,2,3].forEach(i => document.getElementById('tab-'+i).classList.add('done'));
+
+  } catch(e) {
+    document.getElementById('gen-title').textContent = 'Fehler aufgetreten';
+    document.getElementById('gen-sub').textContent   = e.message;
+    btn.disabled = false;
+    btn.innerHTML = 'Nochmals versuchen';
+  }
+}
+
+function triggerDownload(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function resetForm() {
+  ['tp_vorname','tp_nachname','tp_strasse','tp_plz','tp_ort','tp_ausweis',
+   'tp_mak_nr','tp_iban','tp_bic','tp_geldinstitut','tp_steuernummer','provision_pct']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('datum').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ort_datum').value = 'HH';
+  document.getElementById('gen-card').style.display='block';
+  document.getElementById('gen-result').style.display='none';
+  document.getElementById('back-4').style.display='flex';
+  const btn=document.getElementById('btn-gen');
+  btn.disabled=false; btn.innerHTML='PDF-Pakete generieren & herunterladen';
+  document.getElementById('gen-title').textContent='Bereit zur Erstellung';
+  document.getElementById('gen-sub').textContent='Alle 5 Formulare werden ausgefüllt und als ZIP-Datei heruntergeladen.';
+  [1,2,3,4].forEach(i => {
+    document.getElementById('tab-'+i).classList.remove('active','done');
+    document.getElementById('step-'+i).classList.remove('active');
+  });
+  cur=0; goTo(1);
+}
+</script>
+</body>
+</html>
