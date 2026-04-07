@@ -84,8 +84,8 @@ def make_04(d):
         "Firmenname": FIXED["firma"],
         "Straße Hausnummer": FIXED["strasse"],
         "PLZ Ort": FIXED["plz_ort"],
-        "MAK-Nummer": FIXED["mak_nr"],
-        "MAK-Nummer und Name des Tippgebers": f"{d['tp_mak_nr']} / {d['tp_vorname']} {d['tp_nachname']}",
+        "MAK-Nummer": d.get("tp_mak_nr", ""),
+        "MAK-Nummer und Name des Tippgebers": f"{d.get('tp_mak_nr','')} / {d['tp_vorname']} {d['tp_nachname']}".strip("/ "),
         "Ort_2": d["ort_datum"], "Datum_2": d["datum"],
         "Vorname": "", "Nachname": "",
     })
@@ -117,7 +117,7 @@ def make_06(d):
 def make_03(d):
     # Schritt 1: AcroForm-Felder füllen
     pdf_bytes = fill_fillable(PDFS["03"], {
-        "MAK-Konto": FIXED["mak_nr"],
+        "MAK-Konto": d.get("tp_mak_nr", ""),
         "Name Vorname  Firmenname": f"{d['tp_vorname']} {d['tp_nachname']}",
         "Straße Hausnummer": d["tp_strasse"],
         "PLZ Ort": d["tp_plz_ort"],
