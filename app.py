@@ -133,6 +133,7 @@ def make_03(d):
         "PLZ Ort Tippgeber": d["tp_plz_ort"],
         "Datum_3": d["datum"],
         "Ort_3":   d["tp_ort"],
+        "Gruppe1":  "/Auswahl2",
     })
     # Schritt 2: Seite 2 – Name/Vorname Tippgeber per Overlay einfügen
     # pdfplumber top=112.4 → PDF y = 841.9 - 112.4 - 2 = 727
