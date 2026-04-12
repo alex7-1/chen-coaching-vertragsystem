@@ -22,7 +22,7 @@ PDFS = {
     "04": BASE_DIR / "04 FF_Sicherungsabtretung_2025_DIGI_04 1 Kopie.pdf",
     "05": BASE_DIR / "05 FF_Tippgebervertrag_2025_DIGI 1.pdf",
     "06": BASE_DIR / "06 FF_Vertriebsregulatorik.pdf",
-    "07": BASE_DIR / "07 FF-_Depotanbindung_fondsplattformen.pdf",
+    "07": BASE_DIR / "07 FF- Depotanbindung fondsplattformen.pdf",
 }
 
 FIXED = {
