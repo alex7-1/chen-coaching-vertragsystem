@@ -36,15 +36,15 @@ def fill_fillable(src_path, fields):
     reader = PdfReader(str(src_path))
     writer = PdfWriter()
     writer.append(reader)
-    try:
-        writer.update_page_form_field_values(None, fields, auto_regenerate=False)
-    except TypeError:
-        for page in writer.pages:
-            try:
-                writer.update_page_form_field_values(page, fields, auto_regenerate=False)
-            except Exception:
-                pass
     if "/AcroForm" in writer._root_object:
+        try:
+            writer.update_page_form_field_values(None, fields, auto_regenerate=False)
+        except TypeError:
+            for page in writer.pages:
+                try:
+                    writer.update_page_form_field_values(page, fields, auto_regenerate=False)
+                except Exception:
+                    pass
         writer._root_object["/AcroForm"].update(
             {NameObject("/NeedAppearances"): BooleanObject(True)}
         )
