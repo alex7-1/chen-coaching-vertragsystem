@@ -16,11 +16,13 @@ CORS(app)
 BASE_DIR = Path(__file__).parent
 
 PDFS = {
+    "01": BASE_DIR / "01 Chen Coaching Prinzipien.pdf",
     "02": BASE_DIR / "02 Vertriebspartnervertrag Chen Coaching.pdf",
     "03": BASE_DIR / "03 FF-Formular_Änderung der Bankverbindung auf Dritten_OKT_2025_DIGI.pdf",
     "04": BASE_DIR / "04 FF_Sicherungsabtretung_2025_DIGI_04 1 Kopie.pdf",
     "05": BASE_DIR / "05 FF_Tippgebervertrag_2025_DIGI 1.pdf",
     "06": BASE_DIR / "06 FF_Vertriebsregulatorik.pdf",
+    "07": BASE_DIR / "07 FF-_Depotanbindung_fondsplattformen.pdf",
 }
 
 FIXED = {
@@ -42,7 +44,6 @@ def fill_fillable(src_path, fields):
                 writer.update_page_form_field_values(page, fields, auto_regenerate=False)
             except Exception:
                 pass
-    # NeedAppearances: PDF-Viewer soll Felder neu rendern (wichtig für Comb-Felder wie IBAN/BIC)
     if "/AcroForm" in writer._root_object:
         writer._root_object["/AcroForm"].update(
             {NameObject("/NeedAppearances"): BooleanObject(True)}
@@ -79,6 +80,18 @@ def fill_overlay(src_path, text_fields):
     buf.seek(0)
     return buf.read()
 
+def make_01(d):
+    return fill_overlay(PDFS["01"], [
+        (1, 204.0, 669.8, f"{d['tp_vorname']} {d['tp_nachname']}", 10),  # Chen Coaching Mitglied
+        (1, 204.0, 638.1, d["datum"],                                10),  # Datum: oben
+        (1, 109.5,  99.1, d["datum"],                                10),  # Datum, Ort unten
+    ])
+
+def make_07(d):
+    return fill_overlay(PDFS["07"], [
+        (1, 222.0, 59.0, d["datum"], 10),  # Datum*
+    ])
+
 def make_04(d):
     return fill_fillable(PDFS["04"], {
         "Firmenname": FIXED["firma"],
@@ -102,9 +115,9 @@ def make_05(d):
         "PLZ Ort Tippgeber": d["tp_plz_ort"],
         "Personalausweisnummer": d["tp_ausweis"],
         "Prozent der Abschlussprovision": d.get("provision_pct", ""),
-        "Ort":  d["ort_datum"],   # Makler (Chen Coaching)
+        "Ort":  d["ort_datum"],
         "Datum": d["datum"],
-        "Ort_2":  d["tp_ort"],    # Tippgeber
+        "Ort_2":  d["tp_ort"],
         "Datum_2": d["datum"],
     })
 
@@ -115,7 +128,6 @@ def make_06(d):
     })
 
 def make_03(d):
-    # Schritt 1: AcroForm-Felder füllen
     pdf_bytes = fill_fillable(PDFS["03"], {
         "MAK-Konto": d.get("tp_mak_nr", ""),
         "Name Vorname  Firmenname": f"{d['tp_vorname']} {d['tp_nachname']}",
@@ -135,14 +147,11 @@ def make_03(d):
         "Ort_3":   d["tp_ort"],
         "Gruppe1":  "/Auswahl2",
     })
-    # Schritt 2: Seite 2 – Name/Vorname Tippgeber per Overlay einfügen
-    # pdfplumber top=112.4 → PDF y = 841.9 - 112.4 - 2 = 727
-    page_h = 841.9
     tmp_path = io.BytesIO(pdf_bytes)
     reader = PdfReader(tmp_path)
     writer = PdfWriter()
     for i, page in enumerate(reader.pages):
-        if i == 1:  # Seite 2
+        if i == 1:
             packet = io.BytesIO()
             pw = float(page.mediabox.width)
             ph = float(page.mediabox.height)
@@ -207,11 +216,13 @@ def generate():
         if missing:
             return jsonify({"error": f"Fehlende Felder: {', '.join(missing)}"}), 400
         files = {
-            "02_Vertriebspartnervertrag.pdf": make_02(d),
-            "03_Bankverbindung.pdf":          make_03(d),
-            "04_Sicherungsabtretung.pdf":     make_04(d),
-            "05_Tippgebervertrag.pdf":        make_05(d),
-            "06_Vertriebsregulatorik.pdf":    make_06(d),
+            "01_Chen_Coaching_Prinzipien.pdf": make_01(d),
+            "02_Vertriebspartnervertrag.pdf":  make_02(d),
+            "03_Bankverbindung.pdf":           make_03(d),
+            "04_Sicherungsabtretung.pdf":      make_04(d),
+            "05_Tippgebervertrag.pdf":         make_05(d),
+            "06_Vertriebsregulatorik.pdf":     make_06(d),
+            "07_Depotanbindung.pdf":           make_07(d),
         }
         zip_buf = io.BytesIO()
         name = f"{d['tp_nachname']}_{d['tp_vorname']}"
