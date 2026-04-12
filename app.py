@@ -106,16 +106,16 @@ def make_04(d):
     tp_mak = d.get("tp_mak_nr", "")
     mak_tg = tp_mak  # nur Nummer, kein Name
     fields = [
-        # Vorname Tippgeber (rect top=154.7 -> fill_y=670.7)
-        (1,  66.0, 670.7, d["tp_vorname"],          10),
-        (1, 309.0, 670.7, d["tp_nachname"],         10),
-        # Straße: white box über Spaldingstraße, dann Tippgeber-Adresse
-        (1,  66.0, 641.8, d["tp_strasse"],          10, 231, 16),
-        (1, 309.0, 641.8, d["tp_plz_ort"],          10, 231, 16),
-        # MAK-Nr inline (nur wenn vorhanden)
-        (1, 433.0, 591.5, mak_tg,                    8),
+        # Vorname Tippgeber (rect top=147.0 h=22.2 x0=57 -> text_y=677.7)
+        (1,  59.0, 677.7, d["tp_vorname"],          10),
+        (1, 309.0, 677.7, d["tp_nachname"],         10),
+        # Straße: white box + Tippgeber-Adresse (rect top=176.7 h=22.2 -> text_y=648.0)
+        (1,  59.0, 648.0, d["tp_strasse"],          10, 239, 17),
+        (1, 309.0, 648.0, d["tp_plz_ort"],          10, 238, 17),
+        # MAK-Nr inline (rect top=228.5 h=22.2 x0=435 -> text_y=596.2)
+        (1, 437.0, 596.2, mak_tg,                    8),
         # Seite 2: Datum
-        (2, 179.0, 444.0, d["datum"],               10),
+        (2, 175.0, 444.0, d["datum"],               10),
     ]
     return fill_overlay(PDFS["04"], fields)
 
@@ -127,13 +127,13 @@ def make_05(d):
     # Seite 2: Provision, Makler Ort+Datum, Tippgeber Ort+Datum
     prov = d.get("provision_pct", "")
     fields = [
-        # Tippgeber Vorname: label top=274.7 -> text_y=570.3
-        (1,  66.0, 570.3, d["tp_vorname"],           10),
-        (1, 255.0, 570.3, d["tp_nachname"],          10),
-        (1, 450.0, 570.3, d["tp_ausweis"],           10),
-        # Tippgeber Straße: label top=303.7 -> text_y=541.3
-        (1,  66.0, 541.3, d["tp_strasse"],           10),
-        (1, 309.0, 541.3, d["tp_plz_ort"],           10),
+        # Tippgeber Vorname (rect top=255.1 h=22.2 x0=57 -> text_y=569.6)
+        (1,  59.0, 569.6, d["tp_vorname"],           10),
+        (1, 253.0, 569.6, d["tp_nachname"],          10),
+        (1, 454.0, 569.6, d["tp_ausweis"],           10),
+        # Tippgeber Straße (rect top=284.9 h=22.2 x0=57 -> text_y=539.8)
+        (1,  59.0, 539.8, d["tp_strasse"],           10),
+        (1, 309.0, 539.8, d["tp_plz_ort"],           10),
         # Seite 2: Provision % (rect top=278.9, fill_y=556.0)
         (2, 122.0, 556.0, prov,                      10),
         # Seite 2: Makler Datum only (HH already printed at top=709.3)
