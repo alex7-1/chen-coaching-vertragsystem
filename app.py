@@ -84,7 +84,7 @@ def make_01(d):
     return fill_overlay(PDFS["01"], [
         (1, 204.0, 669.8, f"{d['tp_vorname']} {d['tp_nachname']}", 10),  # Chen Coaching Mitglied
         (1, 204.0, 638.1, d["datum"],                                10),  # Datum: oben
-        (1, 109.5,  99.1, d["datum"],                                10),  # Datum, Ort unten
+        (1, 278.0,  99.1, d["datum"],                                10),  # Datum, Ort unten (nach dem Unterstrich)
     ])
 
 def make_07(d):
@@ -93,39 +93,55 @@ def make_07(d):
     ])
 
 def make_04(d):
-    return fill_fillable(PDFS["04"], {
-        "Firmenname": FIXED["firma"],
-        "Straße Hausnummer": FIXED["strasse"],
-        "PLZ Ort": FIXED["plz_ort"],
-        "MAK-Nummer": d.get("tp_mak_nr", ""),
-        "MAK-Nummer und Name des Tippgebers": f"{d.get('tp_mak_nr','')} / {d['tp_vorname']} {d['tp_nachname']}".strip("/ "),
-        "Ort_2": d["ort_datum"], "Datum_2": d["datum"],
-        "Vorname": "", "Nachname": "",
-    })
+    mak_tg = f"{d.get('tp_mak_nr','')} / {d['tp_vorname']} {d['tp_nachname']}".strip("/ ")
+    return fill_overlay(PDFS["04"], [
+        # Page 1: Firma (schon vorausgefüllt, kein Overlay nötig)
+        # Vorname Tippgeber
+        (1,  66.0, 672.5, d["tp_vorname"],   10),
+        # Nachname Tippgeber
+        (1, 309.0, 672.5, d["tp_nachname"],  10),
+        # MAK-Nr Tippgeber
+        (1, 450.0, 672.5, d.get("tp_mak_nr",""), 10),
+        # Straße Tippgeber
+        (1,  66.0, 643.5, d["tp_strasse"],   10),
+        # PLZ Ort Tippgeber
+        (1, 309.0, 643.5, d["tp_plz_ort"],   10),
+        # MAK-Nr + Name (inline Textfeld)
+        (1, 435.0, 594.0, mak_tg,             8),
+        # Page 2: Ort + Datum Sicherungsgeber
+        (2,  57.0, 447.0, d["ort_datum"],    10),
+        (2, 179.0, 447.0, d["datum"],        10),
+    ])
 
 def make_05(d):
-    return fill_fillable(PDFS["05"], {
-        "Firmenname": FIXED["firma"],
-        "Vorname Makler": "", "Nachname Makler": "",
-        "Straße Hausnummer Makler": FIXED["strasse"],
-        "PLZ Ort Makler": FIXED["plz_ort"],
-        "Vorname Tippgeber": d["tp_vorname"],
-        "Nachname Tippgeber": d["tp_nachname"],
-        "Straße Hausnummer Tippgeber": d["tp_strasse"],
-        "PLZ Ort Tippgeber": d["tp_plz_ort"],
-        "Personalausweisnummer": d["tp_ausweis"],
-        "Prozent der Abschlussprovision": d.get("provision_pct", ""),
-        "Ort":  d["ort_datum"],
-        "Datum": d["datum"],
-        "Ort_2":  d["tp_ort"],
-        "Datum_2": d["datum"],
-    })
+    return fill_overlay(PDFS["05"], [
+        # Page 1 - Tippgeber Daten
+        # Vorname Tippgeber
+        (1,  66.0, 706.0, d["tp_vorname"],        10),
+        # Nachname Tippgeber
+        (1, 268.0, 706.0, d["tp_nachname"],       10),
+        # Personalausweisnummer
+        (1, 470.0, 706.0, d["tp_ausweis"],        10),
+        # Straße Tippgeber
+        (1,  66.0, 677.0, d["tp_strasse"],        10),
+        # PLZ Ort Tippgeber
+        (1, 309.0, 677.0, d["tp_plz_ort"],        10),
+        # Provisionssatz
+        (1, 118.0, 536.5, d.get("provision_pct",""), 10),
+        # Page 2 - Ort/Datum Makler (oben)
+        (2,  55.0, 111.5, d["ort_datum"],         10),
+        (2, 179.0, 111.5, d["datum"],             10),
+        # Ort/Datum Tippgeber (unten)
+        (2,  55.0,  70.5, d["tp_ort"],            10),
+        (2, 179.0,  70.5, d["datum"],             10),
+    ])
 
 def make_06(d):
-    return fill_fillable(PDFS["06"], {
-        "MAK-Nummer": FIXED["mak_nr"],
-        "Ort, Datum": f"{d['ort_datum']}, {d['datum']}",
-    })
+    return fill_overlay(PDFS["06"], [
+        # MAK-Nummer (schon als HH vorausgefüllt - nur Datum fehlt)
+        (1,  55.0, 406.0, FIXED["mak_nr"],              10),
+        (1,  55.0, 371.5, f"{d['ort_datum']}, {d['datum']}", 10),
+    ])
 
 def make_03(d):
     pdf_bytes = fill_fillable(PDFS["03"], {
@@ -157,7 +173,16 @@ def make_03(d):
             ph = float(page.mediabox.height)
             c = canvas.Canvas(packet, pagesize=(pw, ph))
             c.setFont("Helvetica", 10)
-            c.drawString(48, 731.5, f"{d['tp_vorname']} {d['tp_nachname']}")
+            # Name Vorname (oben, volle Breite)
+            c.drawString(55, 717.5, f"{d['tp_vorname']} {d['tp_nachname']}")
+            # Straße Hausnummer
+            c.drawString(55, 687.5, d["tp_strasse"])
+            # PLZ Ort
+            c.drawString(303, 687.5, d["tp_plz_ort"])
+            # Ort (Tippgeber-Ort, unten links)
+            c.drawString(55, 645.0, d["tp_ort"])
+            # Datum (unten mitte)
+            c.drawString(179, 645.0, d["datum"])
             c.save()
             packet.seek(0)
             overlay = PdfReader(packet)
