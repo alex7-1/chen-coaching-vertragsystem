@@ -102,9 +102,9 @@ def make_07(d):
     ])
 
 def make_04(d):
-    # MAK inline: nur füllen wenn MAK-Nr vorhanden, sonst leer
+    # MAK inline: nur die MAK-Nummer, ohne Namen
     tp_mak = d.get("tp_mak_nr", "")
-    mak_tg = f"{tp_mak} / {d['tp_vorname']} {d['tp_nachname']}" if tp_mak else ""
+    mak_tg = tp_mak  # nur Nummer, kein Name
     fields = [
         # Vorname Tippgeber (rect top=154.7 -> fill_y=670.7)
         (1,  66.0, 670.7, d["tp_vorname"],          10),
@@ -127,13 +127,13 @@ def make_05(d):
     # Seite 2: Provision, Makler Ort+Datum, Tippgeber Ort+Datum
     prov = d.get("provision_pct", "")
     fields = [
-        # Tippgeber Vorname (rect top=259.8, fill_y=565.5)
-        (1,  66.0, 565.5, d["tp_vorname"],           10),
-        (1, 255.0, 565.5, d["tp_nachname"],          10),
-        (1, 450.0, 565.5, d["tp_ausweis"],           10),
-        # Tippgeber Straße (rect top=288.8, fill_y=536.6) - keine Vordrucke hier
-        (1,  66.0, 536.6, d["tp_strasse"],           10),
-        (1, 309.0, 536.6, d["tp_plz_ort"],           10),
+        # Tippgeber Vorname: label top=274.7 -> text_y=570.3
+        (1,  66.0, 570.3, d["tp_vorname"],           10),
+        (1, 255.0, 570.3, d["tp_nachname"],          10),
+        (1, 450.0, 570.3, d["tp_ausweis"],           10),
+        # Tippgeber Straße: label top=303.7 -> text_y=541.3
+        (1,  66.0, 541.3, d["tp_strasse"],           10),
+        (1, 309.0, 541.3, d["tp_plz_ort"],           10),
         # Seite 2: Provision % (rect top=278.9, fill_y=556.0)
         (2, 122.0, 556.0, prov,                      10),
         # Seite 2: Makler Datum only (HH already printed at top=709.3)
