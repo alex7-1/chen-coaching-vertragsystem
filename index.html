@@ -88,7 +88,6 @@
   .badge-ok { background: var(--success-bg); color: var(--success); }
   .badge-err { background: var(--error-bg); color: var(--error); }
 
-  /* Generate step */
   .gen-center { text-align: center; padding: 40px 20px; }
   .gen-icon { font-size: 38px; display: block; margin-bottom: 14px; }
   .gen-title { font-size: 19px; font-weight: 500; margin-bottom: 8px; }
@@ -244,14 +243,16 @@
     <div class="card">
       <div class="card-head">
         <div class="card-ico">📄</div>
-        <div><div class="card-title">Zu generierende Dokumente</div><div class="card-sub">5 Formulare werden ausgefüllt und als ZIP heruntergeladen</div></div>
+        <div><div class="card-title">Zu generierende Dokumente</div><div class="card-sub">7 Formulare werden ausgefüllt und als ZIP heruntergeladen</div></div>
       </div>
       <div class="doc-list">
+        <div class="doc-item"><span>📝</span><span class="doc-name">01 · Chen Coaching Prinzipien</span><span class="badge badge-pending">Bereit</span></div>
         <div class="doc-item"><span>📝</span><span class="doc-name">02 · Vertriebspartnervertrag</span><span class="badge badge-pending">Bereit</span></div>
         <div class="doc-item"><span>📝</span><span class="doc-name">03 · Bankverbindung auf Dritten</span><span class="badge badge-pending">Bereit</span></div>
         <div class="doc-item"><span>📝</span><span class="doc-name">04 · Sicherungsabtretung</span><span class="badge badge-pending">Bereit</span></div>
         <div class="doc-item"><span>📝</span><span class="doc-name">05 · Tippgebervertrag</span><span class="badge badge-pending">Bereit</span></div>
         <div class="doc-item"><span>📝</span><span class="doc-name">06 · Vertriebsregulatorik</span><span class="badge badge-pending">Bereit</span></div>
+        <div class="doc-item"><span>📝</span><span class="doc-name">07 · Depotanbindung</span><span class="badge badge-pending">Bereit</span></div>
       </div>
     </div>
     <div class="nav-row">
@@ -266,7 +267,7 @@
       <div class="gen-center">
         <span class="gen-icon">📋</span>
         <div class="gen-title" id="gen-title">Bereit zur Erstellung</div>
-        <div class="gen-sub" id="gen-sub">Alle 5 Formulare werden ausgefüllt und als ZIP-Datei heruntergeladen.</div>
+        <div class="gen-sub" id="gen-sub">Alle 7 Formulare werden ausgefüllt und als ZIP-Datei heruntergeladen.</div>
         <button class="btn btn-dl" id="btn-gen" onclick="generate()">
           PDF-Pakete generieren & herunterladen
         </button>
@@ -472,7 +473,7 @@ function resetForm() {
   const btn=document.getElementById('btn-gen');
   btn.disabled=false; btn.innerHTML='PDF-Pakete generieren & herunterladen';
   document.getElementById('gen-title').textContent='Bereit zur Erstellung';
-  document.getElementById('gen-sub').textContent='Alle 5 Formulare werden ausgefüllt und als ZIP-Datei heruntergeladen.';
+  document.getElementById('gen-sub').textContent='Alle 7 Formulare werden ausgefüllt und als ZIP-Datei heruntergeladen.';
   [1,2,3,4].forEach(i => {
     document.getElementById('tab-'+i).classList.remove('active','done');
     document.getElementById('step-'+i).classList.remove('active');
