@@ -102,17 +102,17 @@ def make_07(d):
     ])
 
 def make_04(d):
-    mak_tg = f"{d.get('tp_mak_nr','')} / {d['tp_vorname']} {d['tp_nachname']}".strip("/ ")
+    # MAK inline: nur füllen wenn MAK-Nr vorhanden, sonst leer
+    tp_mak = d.get("tp_mak_nr", "")
+    mak_tg = f"{tp_mak} / {d['tp_vorname']} {d['tp_nachname']}" if tp_mak else ""
     fields = [
-        # Vorname Tippgeber (rect top=154.7, h=21.6 -> fill_y=670.7)
+        # Vorname Tippgeber (rect top=154.7 -> fill_y=670.7)
         (1,  66.0, 670.7, d["tp_vorname"],          10),
         (1, 309.0, 670.7, d["tp_nachname"],         10),
-        # Straße: weißes Rechteck über vorgedrucktem Text, dann Tippgeber-Adresse
-        # rect top=183.6, x0=64, x1=299, h=21.6
+        # Straße: white box über Spaldingstraße, dann Tippgeber-Adresse
         (1,  66.0, 641.8, d["tp_strasse"],          10, 231, 16),
-        # PLZ Ort: rect top=183.6, x0=307, x1=542
         (1, 309.0, 641.8, d["tp_plz_ort"],          10, 231, 16),
-        # MAK-Nr inline (rect top=233.9 -> fill_y=591.5)
+        # MAK-Nr inline (nur wenn vorhanden)
         (1, 433.0, 591.5, mak_tg,                    8),
         # Seite 2: Datum
         (2, 179.0, 444.0, d["datum"],               10),
@@ -136,8 +136,7 @@ def make_05(d):
         (1, 309.0, 536.6, d["tp_plz_ort"],           10),
         # Seite 2: Provision % (rect top=278.9, fill_y=556.0)
         (2, 122.0, 556.0, prov,                      10),
-        # Seite 2: Makler Ort+Datum (rect top=700.8, fill_y=127.1)
-        (2,  55.0, 127.1, d["ort_datum"],            10),
+        # Seite 2: Makler Datum only (HH already printed at top=709.3)
         (2, 179.0, 127.1, d["datum"],                10),
         # Seite 2: Tippgeber Ort+Datum (rect top=741.5, fill_y=86.4)
         (2,  55.0,  86.4, d["tp_ort"],               10),
@@ -154,8 +153,6 @@ def make_06(d):
     ])
 
 def make_03(d):
-    # Seite 1: alle Felder per Overlay
-    # Seite 2: Name, Straße, PLZ/Ort, Ort+Datum unten
     reader = PdfReader(str(PDFS["03"]))
     writer = PdfWriter()
     for i, page in enumerate(reader.pages):
@@ -165,46 +162,42 @@ def make_03(d):
         c = canvas.Canvas(packet, pagesize=(pw, ph))
         c.setFont("Helvetica", 10)
         if i == 0:
-            # A: MAK-Konto Box (top=165.8, x0=238.3)
+            # MAK-Konto (rect top=165.8 x0=238.3)
             mak = d.get("tp_mak_nr", "")
             if mak:
                 c.drawString(240, 662.1, mak)
-            # B: Name, Vorname / Firmenname (volle Breite, top~248 label -> rect oben)
-            # Kein rect für Name-Zeile gefunden - es ist ein AcroForm das jetzt weg ist
-            # Stattdessen: wir zeichnen direkt in die Felder anhand der label-Positionen
-            # Name+Vorname: label top=248.7 -> rect müsste bei ~235 sein, aber kein rect
-            # Aus dem Bild sehen wir: erste Box ist "Name, Vorname / Firmenname"
-            # rect top=? - nicht in den rects... schauen wir nochmal
-            # Die rects zeigen: erste rect top=165.8 (MAK-Konto)
-            # Danach gibt es keine weiteren großen rects bis top=291 (IBAN-Felder)
-            # Das bedeutet Name/Straße/Kontoinhaber/Geldinstitut sind KEINE Rects sondern Linien
-            # Wir orientieren uns an den Label-Positionen:
-            # "Name, Vorname / Firmenname*" label top=248.7 -> Zeile bei ca. y=236
-            c.drawString(55, 579.0, f"{d['tp_vorname']} {d['tp_nachname']}")  # Name/Vorname
-            c.drawString(55, 550.5, d["tp_strasse"])                           # Straße
-            c.drawString(303, 550.5, d["tp_plz_ort"])                         # PLZ Ort
-            c.drawString(55, 522.0, f"{d['tp_vorname']} {d['tp_nachname']}")  # Kontoinhaber
-            # IBAN: comb-Felder top=291.7, fill_y=536.2 -> aber das ist für alte AcroForm
-            # Jetzt einfach als Text:
+            # Name/Vorname: line at top=233.4 -> text_y=607.5
+            c.drawString(63, 595.0, f"{d['tp_vorname']} {d['tp_nachname']}")
+            # Straße: line at top=262.3 -> text_y=578.6
+            c.drawString(63, 578.6, d["tp_strasse"])
+            # PLZ Ort: line at top=262.3 x0=305 -> text_y=578.6
+            c.drawString(307, 578.6, d["tp_plz_ort"])
+            # Kontoinhaber: line at top=291.3 -> text_y=549.6
+            c.drawString(63, 549.6, f"{d['tp_vorname']} {d['tp_nachname']}")
+            # IBAN (rect top=291.7 x0=306.3 -> text_y=540.2)
             c.setFont("Helvetica", 9)
-            c.drawString(308, 536.2, d["tp_iban"])
-            c.drawString(55, 493.5, d["tp_geldinstitut"])                     # Geldinstitut
-            c.drawString(308, 507.6, d["tp_bic"])                             # BIC
-            c.drawString(436, 507.6, d["tp_steuernummer"])                    # Steuernummer
+            c.drawString(308, 540.2, d["tp_iban"])
+            # Geldinstitut: line at top=320.2 -> text_y=520.7
             c.setFont("Helvetica", 10)
-            # Datum Vermittler (HH schon gedruckt, nur Datum fehlt)
+            c.drawString(63, 520.7, d["tp_geldinstitut"])
+            # BIC (rect top=320.3 x0=306.3 -> text_y=511.6)
+            c.setFont("Helvetica", 9)
+            c.drawString(308, 511.6, d["tp_bic"])
+            # Steuernummer (rect top=320.3 x0=434.4 -> text_y=511.6)
+            c.drawString(436, 511.6, d["tp_steuernummer"])
+            c.setFont("Helvetica", 10)
+            # Datum Vermittler (HH bereits gedruckt, nur Datum)
             c.drawString(179, 228.0, d["datum"])
-            # Ort + Datum Tippgeber (unten)
+            # Ort + Datum Tippgeber
             c.drawString(55,  148.4, d["tp_ort"])
             c.drawString(179, 148.4, d["datum"])
         elif i == 1:
-            # Seite 2: Name oben (volle Breite box top=106.5 -> fill_y=713.9)
+            # Name (box top=106.5, fill_y=713.9)
             c.drawString(55, 713.9, f"{d['tp_vorname']} {d['tp_nachname']}")
-            # Straße (box top=135.8 -> fill_y=684.3)
+            # Straße (box top=135.8, fill_y=684.3)
             c.drawString(55, 684.3, d["tp_strasse"])
-            # PLZ Ort (box top=135.8 x0=301 -> fill_y=684.3)
             c.drawString(303, 684.3, d["tp_plz_ort"])
-            # Ort+Datum unten (box top=629.8 -> fill_y=179.5)
+            # Ort+Datum unten (box top=629.8, fill_y=179.5)
             c.drawString(55,  179.5, d["tp_ort"])
             c.drawString(179, 179.5, d["datum"])
         c.save()
