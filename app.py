@@ -32,6 +32,9 @@ FIXED = {
     "mak_nr":  "MAK194317",
 }
 
+# Korrekte Formel: rl_y = 841.89 - rect.TOP - 3
+# (rect.TOP = pdfplumber-Koordinate von oben nach unten)
+
 def fill_fillable(src_path, fields):
     reader = PdfReader(str(src_path))
     writer = PdfWriter()
@@ -101,39 +104,68 @@ def make_07(d):
     ])
 
 def make_04(d):
-    # Koordinaten aus echtem Output gemessen
-    # Straße/PLZ-Felder: erst weiße Box drüber (Vorausfüllung überschreiben), dann neu schreiben
-    # Straße-Rect: x0=57.4 top=176.7 bottom=198.9 → rl_y_bottom=643.0, h=22.2
-    # PLZ-Rect:    x0=307.1 gleiche Zeile
-    # P2 Datum: mit HH ausrichten → rl_y=453.9
+    # Direktes Canvas wie make_03 – zuverlässigste Methode
+    # Formel: rl_y = 841.89 - rect.TOP - 3
+    # Vorname/Name:  rect.top=147.0  → y=691.9
+    # Straße/PLZ:    rect.top=176.7  → y=662.2  (weiße Box zuerst!)
+    # MAK-Nr:        rect.top=228.5  → y=610.4
+    # MAK §1.1:      rect.top=343.3  → y=495.6
+    # P2 Datum:      rl_y = 461.8 - 8 = 434.3  (gemessen -8 relativ zu HH)
     tp_mak = d.get("tp_mak_nr", "")
-    fields = [
-        (1,  57.4, 683.6, d["tp_vorname"],   10),
-        (1, 307.1, 683.6, d["tp_nachname"],  10),
-        # Straße: erst weiße Box (243 breit, 23 hoch), dann Text
-        (1,  57.4, 643.0, "",                10, 242, 23),   # weiße Abdeckung Straße
-        (1, 307.1, 643.0, "",                10, 242, 23),   # weiße Abdeckung PLZ
-        (1,  57.4, 646.0, d["tp_strasse"],   10),
-        (1, 307.1, 646.0, d["tp_plz_ort"],   10),
-        (1, 435.4, 601.3, tp_mak,             9),
-        (1,  70.2, 495.7, tp_mak,             8),
-        (2, 177.0, 453.9, d["datum"],        10),   # gleiche Höhe wie HH (top=388)
-    ]
-    return fill_overlay(PDFS["04"], fields)
+    reader = PdfReader(str(PDFS["04"]))
+    writer = PdfWriter()
+    for i, page in enumerate(reader.pages):
+        packet = io.BytesIO()
+        pw = float(page.mediabox.width)
+        ph = float(page.mediabox.height)
+        c = canvas.Canvas(packet, pagesize=(pw, ph))
+        if i == 0:
+            # Weiße Boxen über vorausgefüllte Felder (Straße/PLZ)
+            c.setFillColorRGB(1, 1, 1)
+            c.rect(57.4,  643.0, 242.1, 22.2, fill=1, stroke=0)
+            c.rect(307.1, 643.0, 242.1, 22.2, fill=1, stroke=0)
+            # Text schreiben
+            c.setFillColorRGB(0, 0, 0)
+            c.setFont("Helvetica", 10)
+            c.drawString(57.4,  691.9, d["tp_vorname"])
+            c.drawString(307.1, 691.9, d["tp_nachname"])
+            c.drawString(57.4,  662.2, d["tp_strasse"])
+            c.drawString(307.1, 662.2, d["tp_plz_ort"])
+            c.setFont("Helvetica", 9)
+            c.drawString(435.4, 610.4, tp_mak)
+            c.drawString(70.2,  495.6, tp_mak)
+        elif i == 1:
+            c.setFillColorRGB(0, 0, 0)
+            c.setFont("Helvetica", 10)
+            c.drawString(177.0, 434.3, d["datum"])
+        c.save()
+        packet.seek(0)
+        overlay = PdfReader(packet)
+        page.merge_page(overlay.pages[0])
+        writer.add_page(page)
+    buf = io.BytesIO()
+    writer.write(buf)
+    buf.seek(0)
+    return buf.read()
 
 def make_05(d):
-    # Koordinaten aus echtem Output gemessen
+    # Formel: rl_y = 841.89 - rect.TOP - 3
+    # P1 Vorname/Nachname/Ausweis: rect.top=255.1 → y=583.8
+    # P1 Straße/PLZ:               rect.top=284.9 → y=554.0
+    # P2 Provision:                rect.top=274.8 → y=564.1
+    # P2 Makler Datum:             rect.top=708.9 → y=130.0
+    # P2 TG Ort/Datum:             rect.top=750.8 → y=88.1
     prov = d.get("provision_pct", "")
     fields = [
-        (1,  57.4, 575.5, d["tp_vorname"],   10),
-        (1, 251.3, 575.5, d["tp_nachname"],  10),
-        (1, 452.3, 575.5, d["tp_ausweis"],   10),
-        (1,  57.4, 545.7, d["tp_strasse"],   10),
-        (1, 307.1, 545.7, d["tp_plz_ort"],   10),
-        (2, 114.9, 559.8, prov,              10),
-        (2, 173.7, 132.6, d["datum"],        10),   # gleiche Höhe wie HH (top=709.3)
-        (2,  46.0,  68.5, d["tp_ort"],       10),
-        (2, 173.7,  68.5, d["datum"],        10),
+        (1,  57.4, 583.8, d["tp_vorname"],   10),
+        (1, 251.3, 583.8, d["tp_nachname"],  10),
+        (1, 452.3, 583.8, d["tp_ausweis"],   10),
+        (1,  57.4, 554.0, d["tp_strasse"],   10),
+        (1, 307.1, 554.0, d["tp_plz_ort"],   10),
+        (2, 114.9, 564.1, prov,              10),
+        (2, 173.7, 122.1, d["datum"],        10),   # HH rl_y=132.6, Datum -8 = 124 → gemessen 122
+        (2,  46.0,  80.2, d["tp_ort"],       10),   # gemessen: Hamburg top=773.4 → rl_y=68.5, +12
+        (2, 173.7,  80.2, d["datum"],        10),
     ]
     return fill_overlay(PDFS["05"], fields)
 
@@ -144,7 +176,19 @@ def make_06(d):
     ])
 
 def make_03(d):
-    # Koordinaten aus echtem Output gemessen (alle +7.9 korrigiert)
+    # Formel: rl_y = 841.89 - line/rect.TOP - 3
+    # P1 MAK-Konto:    rect.top=158.4  → y=680.5
+    # P1 Name:         Linie top=228.0 → y=610.9
+    # P1 Straße/PLZ:   Linie top=257.7 → y=581.2
+    # P1 Kontoinhaber: Linie top=287.5 → y=551.4
+    # P1 IBAN:         rect.top=287.97 → y=550.9
+    # P1 Geldinstitut: Linie top=317.3 → y=521.6
+    # P1 BIC/Steuer:   rect.top=317.36 → y=521.5
+    # P1 Vermittler Datum: sign rect.top=586.9 → y=252.0
+    # P1 TG Ort/Datum:     sign rect.top=668.8 → y=170.1
+    # P2 Name:         rect.top=97.3   → y=741.6
+    # P2 Straße/PLZ:   rect.top=127.5  → y=711.4
+    # P2 TG sign:      rect.top=635.9  → y=203.0
     reader = PdfReader(str(PDFS["03"]))
     writer = PdfWriter()
     for i, page in enumerate(reader.pages):
@@ -156,31 +200,28 @@ def make_03(d):
         if i == 0:
             mak = d.get("tp_mak_nr", "")
             if mak:
-                c.drawString(237.0, 672.2, mak)
-            c.drawString(55.0, 602.1, f"{d['tp_vorname']} {d['tp_nachname']}")
-            c.drawString(55.0, 572.4, d["tp_strasse"])
-            c.drawString(306.0, 572.4, d["tp_plz_ort"])
-            c.drawString(55.0, 542.6, f"{d['tp_vorname']} {d['tp_nachname']}")
+                c.drawString(237.0, 680.5, mak)
+            c.drawString(55.0, 610.9, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(55.0, 581.2, d["tp_strasse"])
+            c.drawString(306.0, 581.2, d["tp_plz_ort"])
+            c.drawString(55.0, 551.4, f"{d['tp_vorname']} {d['tp_nachname']}")
             c.setFont("Helvetica", 9)
-            c.drawString(307.0, 549.6, d["tp_iban"])
+            c.drawString(307.0, 550.9, d["tp_iban"])
             c.setFont("Helvetica", 10)
-            c.drawString(55.0, 512.9, d["tp_geldinstitut"])
+            c.drawString(55.0, 521.6, d["tp_geldinstitut"])
             c.setFont("Helvetica", 9)
-            c.drawString(307.0, 520.2, d["tp_bic"])
-            c.drawString(438.0, 520.2, d["tp_steuernummer"])
-            # Vermittler Datum: gleiche Höhe wie HH (top=591.0, rl_y=250.9)
+            c.drawString(307.0, 521.5, d["tp_bic"])
+            c.drawString(438.0, 521.5, d["tp_steuernummer"])
             c.setFont("Helvetica", 10)
-            c.drawString(174.0, 250.9, d["datum"])
-            # TG Ort + Datum
-            c.drawString(46.0,  150.5, d["tp_ort"])
-            c.drawString(174.0, 150.5, d["datum"])
+            c.drawString(174.0, 244.0, d["datum"])   # Vermittler Datum: HH-aligned
+            c.drawString(46.0,  158.4, d["tp_ort"])
+            c.drawString(174.0, 158.4, d["datum"])
         elif i == 1:
-            c.drawString(46.0,  733.3, f"{d['tp_vorname']} {d['tp_nachname']}")
-            c.drawString(46.0,  702.9, d["tp_strasse"])
-            c.drawString(301.0, 702.9, d["tp_plz_ort"])
-            # P2 TG sign: +7.9 von 175.5
-            c.drawString(46.0,  183.4, d["tp_ort"])
-            c.drawString(174.0, 183.4, d["datum"])
+            c.drawString(46.0,  741.6, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(46.0,  711.4, d["tp_strasse"])
+            c.drawString(301.3, 711.4, d["tp_plz_ort"])
+            c.drawString(46.0,  191.3, d["tp_ort"])
+            c.drawString(174.0, 191.3, d["datum"])
         c.save()
         packet.seek(0)
         overlay = PdfReader(packet)
