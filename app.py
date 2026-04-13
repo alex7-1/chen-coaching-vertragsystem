@@ -101,71 +101,40 @@ def make_07(d):
     ])
 
 def make_04(d):
-    """
-    PDF 04 Sicherungsabtretung
-    Koordinaten ermittelt via pdfplumber (top -> reportlab y = 841.9 - top)
-    
-    Seite 1:
-      - Firma:    label top=132.4  -> y≈694
-      - Vorname:  label top=162.1  -> y≈665
-      - Name:     x=309.7, gleiche Zeile
-      - Straße:   label top=191.8  -> y≈635
-      - PLZ,Ort:  x=309.7, gleiche Zeile
-      - MAK-Nr (Header-Box): x=436, label top=243.6 -> y≈594
-      - MAK inline §1.1: nach 'MAK-Nr. / Name des Tippgebers', top=349.9 -> y≈488
-    Seite 2:
-      - Datum: x=173, label top=411.4 -> y≈433
-    """
+    # Koordinaten: fill_y = 841.89 - rect.bottom + 3
+    # Page 1 rects (bottom-Werte): Vorname/Name=169.15, Strasse/PLZ=198.87
+    #   MAK-Nr=250.67, MAK-inline=355.51
+    # Page 2 lines: Unterschrift-Zeile bottom=418.46
     tp_mak = d.get("tp_mak_nr", "")
     fields = [
-        # Seite 1: Tippgeber-Daten in den Feldern des Sicherungsgebers
-        (1,  60.0, 694.0, d["tp_vorname"],          10),
-        (1, 309.7, 694.0, d["tp_nachname"],          10),
-        (1,  60.0, 635.0, d["tp_strasse"],           10),
-        (1, 309.7, 635.0, d["tp_plz_ort"],           10),
-        # MAK-Nr. Feld oben rechts (Header-Box)
-        (1, 436.0, 594.0, tp_mak,                     8),
-        # MAK inline in §1.1 nach "MAK-Nr. / Name des Tippgebers"
-        (1, 165.0, 488.0, tp_mak,                     8),
-        # Seite 2: Datum
-        (2, 173.0, 433.0, d["datum"],                10),
+        (1,  57.4, 675.7, d["tp_vorname"],   10),
+        (1, 307.1, 675.7, d["tp_nachname"],  10),
+        (1,  57.4, 646.0, d["tp_strasse"],   10),
+        (1, 307.1, 646.0, d["tp_plz_ort"],   10),
+        (1, 435.4, 594.2, tp_mak,             9),
+        (1,  70.2, 489.4, tp_mak,             8),
+        (2, 177.0, 426.4, d["datum"],        10),
     ]
     return fill_overlay(PDFS["04"], fields)
 
 def make_05(d):
-    """
-    PDF 05 Tippgebervertrag
-    Koordinaten ermittelt via pdfplumber
-
-    Seite 1 - Tippgeber (Block B):
-      - Vorname:  label top=270.3 -> y≈560
-      - Nachname: x=253.6, gleiche Zeile
-      - Ausweis:  x=454.9, gleiche Zeile
-      - Straße:   label top=300.1 -> y≈530
-      - PLZ,Ort:  x=309.7, gleiche Zeile
-
-    Seite 2:
-      - Provision %: vor dem '%'-Zeichen, x=116, top=277.3 -> y≈567
-      - Makler Datum: x=176, top=735.4 -> y≈109  (Ort "HH" bereits gedruckt)
-      - TG Ort:       x=48.6, top=777.3 -> y≈67
-      - TG Datum:     x=176,  top=777.3 -> y≈67
-    """
+    # Koordinaten: fill_y = 841.89 - rect.bottom + 3
+    # Page 1: Vorname/Nachname/Ausweis bottom=277.32 → 567.57
+    #         Strasse/PLZ bottom=307.12 → 537.77
+    # Page 2: Provision rect bottom=287.08 → 557.81
+    #         Makler bottom=742.43 → 102.46
+    #         TG bottom=784.34 → 60.55
     prov = d.get("provision_pct", "")
     fields = [
-        # Seite 1: Tippgeber Vorname/Nachname/Ausweis
-        (1,  60.0, 560.0, d["tp_vorname"],           10),
-        (1, 253.6, 560.0, d["tp_nachname"],          10),
-        (1, 454.9, 560.0, d["tp_ausweis"],           10),
-        # Seite 1: Tippgeber Straße / PLZ Ort
-        (1,  60.0, 530.0, d["tp_strasse"],           10),
-        (1, 309.7, 530.0, d["tp_plz_ort"],           10),
-        # Seite 2: Provision %
-        (2, 116.0, 567.0, prov,                      10),
-        # Seite 2: Makler Datum (Ort "HH" bereits aufgedruckt)
-        (2, 176.0, 109.0, d["datum"],                10),
-        # Seite 2: Tippgeber Ort + Datum
-        (2,  48.6,  67.0, d["tp_ort"],               10),
-        (2, 176.0,  67.0, d["datum"],                10),
+        (1,  57.4, 567.6, d["tp_vorname"],   10),
+        (1, 251.3, 567.6, d["tp_nachname"],  10),
+        (1, 452.3, 567.6, d["tp_ausweis"],   10),
+        (1,  57.4, 537.8, d["tp_strasse"],   10),
+        (1, 307.1, 537.8, d["tp_plz_ort"],   10),
+        (2, 114.9, 557.8, prov,              10),
+        (2, 173.7, 102.5, d["datum"],        10),
+        (2,  46.0,  60.6, d["tp_ort"],       10),
+        (2, 173.7,  60.6, d["datum"],        10),
     ]
     return fill_overlay(PDFS["05"], fields)
 
@@ -176,30 +145,21 @@ def make_06(d):
     ])
 
 def make_03(d):
-    """
-    PDF 03 Änderung der Bankverbindung auf Dritten
-    Koordinaten ermittelt via pdfplumber (top -> reportlab y = 841.9 - top)
-
-    Seite 1:
-      - MAK-Konto (A-Feld):   x=240, zwischen 'MAK-Konto*' (top=166.3) und 'hinterlegten' -> y≈684
-      - Name/Vorname (B-Box): x=57,  label top=243.6 -> fill y≈584
-      - Straße:               x=57,  label top=273.3 -> fill y≈554
-      - PLZ,Ort:              x=308, gleiche Zeile   -> fill y≈554
-      - Kontoinhaber:         x=57,  label top=303.1 -> fill y≈524
-      - IBAN:                 x=308, label top=306.1 -> fill y≈524
-      - Geldinstitut:         x=57,  label top=332.9 -> fill y≈495
-      - BIC:                  x=308, label top=335.5 -> fill y≈495
-      - Steuernummer:         x=438, label top=335.5 -> fill y≈495
-      - Datum Vermittler:     x=179, label top=613.3 -> fill y≈237  (Ort "HH" gedruckt)
-      - Ort Tippgeber:        x=48,  label top=695.2 -> fill y≈155
-      - Datum Tippgeber:      x=176, gleiche Zeile   -> fill y≈155
-
-    Seite 2:
-      - Name/Vorname:         x=55,  label top=112.4 -> fill y≈714
-      - Straße:               x=55,  label top=142.6 -> fill y≈685
-      - PLZ,Ort:              x=304, gleiche Zeile   -> fill y≈685
-      - Ort+Datum Tippgeber:  x=55/176, label top=662.2 -> fill y≈188
-    """
+    # Koordinaten: fill_y = 841.89 - line/rect.bottom + 3
+    # Page 1:
+    #   MAK-Konto rect bottom=180.56 → 664.33
+    #   Name/Vorname line bottom=250.64 → 594.25
+    #   Strasse line bottom=280.41 → 564.48, PLZ x=306
+    #   Kontoinhaber line bottom=310.17 → 534.72
+    #   IBAN rect bottom=302.35 → 542.54
+    #   Geldinstitut line bottom=339.93 → 504.96
+    #   BIC rect bottom=331.75 → 513.14, Steuer x=438
+    #   Vermittler Datum rect bottom=620.44 → 224.45
+    #   TG Ort rect bottom=702.33 → 142.56, TG Datum x=174
+    # Page 2:
+    #   Name rect bottom=119.51 → 725.38
+    #   Strasse rect bottom=149.91 → 694.98, PLZ x=301
+    #   TG Ort rect bottom=669.37 → 175.52, TG Datum x=174
     reader = PdfReader(str(PDFS["03"]))
     writer = PdfWriter()
     for i, page in enumerate(reader.pages):
@@ -209,44 +169,30 @@ def make_03(d):
         c = canvas.Canvas(packet, pagesize=(pw, ph))
         c.setFont("Helvetica", 10)
         if i == 0:
-            # MAK-Konto (A-Block): inline nach "MAK-Konto*"
             mak = d.get("tp_mak_nr", "")
             if mak:
-                c.drawString(240, 684.0, mak)
-            # Name/Vorname des Tippgebers (B-Block)
-            c.drawString(57, 584.0, f"{d['tp_vorname']} {d['tp_nachname']}")
-            # Straße
-            c.drawString(57, 554.0, d["tp_strasse"])
-            # PLZ, Ort
-            c.drawString(308, 554.0, d["tp_plz_ort"])
-            # Kontoinhaber
-            c.drawString(57, 524.0, f"{d['tp_vorname']} {d['tp_nachname']}")
-            # IBAN
+                c.drawString(237.0, 664.3, mak)
+            c.drawString(55.0, 594.2, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(55.0, 564.5, d["tp_strasse"])
+            c.drawString(306.0, 564.5, d["tp_plz_ort"])
+            c.drawString(55.0, 534.7, f"{d['tp_vorname']} {d['tp_nachname']}")
             c.setFont("Helvetica", 9)
-            c.drawString(308, 524.0, d["tp_iban"])
-            # Geldinstitut
+            c.drawString(307.0, 542.5, d["tp_iban"])
             c.setFont("Helvetica", 10)
-            c.drawString(57, 495.0, d["tp_geldinstitut"])
-            # BIC
+            c.drawString(55.0, 505.0, d["tp_geldinstitut"])
             c.setFont("Helvetica", 9)
-            c.drawString(308, 495.0, d["tp_bic"])
-            # Steuernummer
-            c.drawString(438, 495.0, d["tp_steuernummer"])
-            # Datum Vermittler (Ort "HH" bereits gedruckt)
+            c.drawString(307.0, 513.1, d["tp_bic"])
+            c.drawString(438.0, 513.1, d["tp_steuernummer"])
             c.setFont("Helvetica", 10)
-            c.drawString(179, 237.0, d["datum"])
-            # Ort + Datum Tippgeber
-            c.drawString(48,  155.0, d["tp_ort"])
-            c.drawString(176, 155.0, d["datum"])
+            c.drawString(174.0, 224.5, d["datum"])
+            c.drawString(46.0,  142.6, d["tp_ort"])
+            c.drawString(174.0, 142.6, d["datum"])
         elif i == 1:
-            # Name/Vorname (top=112.4 -> y=714)
-            c.drawString(55, 714.0, f"{d['tp_vorname']} {d['tp_nachname']}")
-            # Straße (top=142.6 -> y=685)
-            c.drawString(55, 685.0, d["tp_strasse"])
-            c.drawString(304, 685.0, d["tp_plz_ort"])
-            # Ort + Datum Tippgeber (top=662.2 -> y=188)
-            c.drawString(55,  188.0, d["tp_ort"])
-            c.drawString(176, 188.0, d["datum"])
+            c.drawString(46.0,  725.4, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(46.0,  695.0, d["tp_strasse"])
+            c.drawString(301.0, 695.0, d["tp_plz_ort"])
+            c.drawString(46.0,  175.5, d["tp_ort"])
+            c.drawString(174.0, 175.5, d["datum"])
         c.save()
         packet.seek(0)
         overlay = PdfReader(packet)
