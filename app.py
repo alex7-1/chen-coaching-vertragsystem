@@ -101,40 +101,33 @@ def make_07(d):
     ])
 
 def make_04(d):
-    # Koordinaten: fill_y = 841.89 - rect.bottom + 3
-    # Page 1 rects (bottom-Werte): Vorname/Name=169.15, Strasse/PLZ=198.87
-    #   MAK-Nr=250.67, MAK-inline=355.51
-    # Page 2 lines: Unterschrift-Zeile bottom=418.46
+    # Koordinaten aus echtem Output gemessen (pdfplumber auf generiertem PDF)
+    # Alle y-Werte = 841.89 - pdfplumber_top des tatsächlich gerenderten Textes
     tp_mak = d.get("tp_mak_nr", "")
     fields = [
-        (1,  57.4, 675.7, d["tp_vorname"],   10),
-        (1, 307.1, 675.7, d["tp_nachname"],  10),
-        (1,  57.4, 646.0, d["tp_strasse"],   10),
+        (1,  57.4, 683.6, d["tp_vorname"],   10),
+        (1, 307.1, 683.6, d["tp_nachname"],  10),
+        (1,  57.4, 646.0, d["tp_strasse"],   10),   # Straße-Feld (kein Messwert, +7.9 von 638.1)
         (1, 307.1, 646.0, d["tp_plz_ort"],   10),
-        (1, 435.4, 594.2, tp_mak,             9),
-        (1,  70.2, 489.4, tp_mak,             8),
-        (2, 177.0, 426.4, d["datum"],        10),
+        (1, 435.4, 601.3, tp_mak,             9),
+        (1,  70.2, 495.7, tp_mak,             8),
+        (2, 177.0, 434.3, d["datum"],        10),
     ]
     return fill_overlay(PDFS["04"], fields)
 
 def make_05(d):
-    # Koordinaten: fill_y = 841.89 - rect.bottom + 3
-    # Page 1: Vorname/Nachname/Ausweis bottom=277.32 → 567.57
-    #         Strasse/PLZ bottom=307.12 → 537.77
-    # Page 2: Provision rect bottom=287.08 → 557.81
-    #         Makler bottom=742.43 → 102.46
-    #         TG bottom=784.34 → 60.55
+    # Koordinaten aus echtem Output gemessen
     prov = d.get("provision_pct", "")
     fields = [
-        (1,  57.4, 567.6, d["tp_vorname"],   10),
-        (1, 251.3, 567.6, d["tp_nachname"],  10),
-        (1, 452.3, 567.6, d["tp_ausweis"],   10),
-        (1,  57.4, 537.8, d["tp_strasse"],   10),
-        (1, 307.1, 537.8, d["tp_plz_ort"],   10),
-        (2, 114.9, 557.8, prov,              10),
-        (2, 173.7, 102.5, d["datum"],        10),
-        (2,  46.0,  60.6, d["tp_ort"],       10),
-        (2, 173.7,  60.6, d["datum"],        10),
+        (1,  57.4, 575.5, d["tp_vorname"],   10),
+        (1, 251.3, 575.5, d["tp_nachname"],  10),
+        (1, 452.3, 575.5, d["tp_ausweis"],   10),
+        (1,  57.4, 545.7, d["tp_strasse"],   10),
+        (1, 307.1, 545.7, d["tp_plz_ort"],   10),
+        (2, 114.9, 559.8, prov,              10),
+        (2, 173.7, 110.4, d["datum"],        10),
+        (2,  46.0,  68.5, d["tp_ort"],       10),
+        (2, 173.7,  68.5, d["datum"],        10),
     ]
     return fill_overlay(PDFS["05"], fields)
 
@@ -145,21 +138,7 @@ def make_06(d):
     ])
 
 def make_03(d):
-    # Koordinaten: fill_y = 841.89 - line/rect.bottom + 3
-    # Page 1:
-    #   MAK-Konto rect bottom=180.56 → 664.33
-    #   Name/Vorname line bottom=250.64 → 594.25
-    #   Strasse line bottom=280.41 → 564.48, PLZ x=306
-    #   Kontoinhaber line bottom=310.17 → 534.72
-    #   IBAN rect bottom=302.35 → 542.54
-    #   Geldinstitut line bottom=339.93 → 504.96
-    #   BIC rect bottom=331.75 → 513.14, Steuer x=438
-    #   Vermittler Datum rect bottom=620.44 → 224.45
-    #   TG Ort rect bottom=702.33 → 142.56, TG Datum x=174
-    # Page 2:
-    #   Name rect bottom=119.51 → 725.38
-    #   Strasse rect bottom=149.91 → 694.98, PLZ x=301
-    #   TG Ort rect bottom=669.37 → 175.52, TG Datum x=174
+    # Koordinaten aus echtem Output gemessen (alle +7.9 korrigiert)
     reader = PdfReader(str(PDFS["03"]))
     writer = PdfWriter()
     for i, page in enumerate(reader.pages):
@@ -171,28 +150,31 @@ def make_03(d):
         if i == 0:
             mak = d.get("tp_mak_nr", "")
             if mak:
-                c.drawString(237.0, 664.3, mak)
-            c.drawString(55.0, 594.2, f"{d['tp_vorname']} {d['tp_nachname']}")
-            c.drawString(55.0, 564.5, d["tp_strasse"])
-            c.drawString(306.0, 564.5, d["tp_plz_ort"])
-            c.drawString(55.0, 534.7, f"{d['tp_vorname']} {d['tp_nachname']}")
+                c.drawString(237.0, 672.2, mak)
+            c.drawString(55.0, 602.1, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(55.0, 572.4, d["tp_strasse"])
+            c.drawString(306.0, 572.4, d["tp_plz_ort"])
+            c.drawString(55.0, 542.6, f"{d['tp_vorname']} {d['tp_nachname']}")
             c.setFont("Helvetica", 9)
-            c.drawString(307.0, 542.5, d["tp_iban"])
+            c.drawString(307.0, 549.6, d["tp_iban"])
             c.setFont("Helvetica", 10)
-            c.drawString(55.0, 505.0, d["tp_geldinstitut"])
+            c.drawString(55.0, 512.9, d["tp_geldinstitut"])
             c.setFont("Helvetica", 9)
-            c.drawString(307.0, 513.1, d["tp_bic"])
-            c.drawString(438.0, 513.1, d["tp_steuernummer"])
+            c.drawString(307.0, 520.2, d["tp_bic"])
+            c.drawString(438.0, 520.2, d["tp_steuernummer"])
+            # Vermittler Datum: gleiche Höhe wie HH (rl_y=250.9)
             c.setFont("Helvetica", 10)
-            c.drawString(174.0, 224.5, d["datum"])
-            c.drawString(46.0,  142.6, d["tp_ort"])
-            c.drawString(174.0, 142.6, d["datum"])
+            c.drawString(174.0, 250.9, d["datum"])
+            # TG Ort + Datum
+            c.drawString(46.0,  150.5, d["tp_ort"])
+            c.drawString(174.0, 150.5, d["datum"])
         elif i == 1:
-            c.drawString(46.0,  725.4, f"{d['tp_vorname']} {d['tp_nachname']}")
-            c.drawString(46.0,  695.0, d["tp_strasse"])
-            c.drawString(301.0, 695.0, d["tp_plz_ort"])
-            c.drawString(46.0,  175.5, d["tp_ort"])
-            c.drawString(174.0, 175.5, d["datum"])
+            c.drawString(46.0,  733.3, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(46.0,  702.9, d["tp_strasse"])
+            c.drawString(301.0, 702.9, d["tp_plz_ort"])
+            # P2 TG sign: +7.9 von 175.5
+            c.drawString(46.0,  183.4, d["tp_ort"])
+            c.drawString(174.0, 183.4, d["datum"])
         c.save()
         packet.seek(0)
         overlay = PdfReader(packet)
