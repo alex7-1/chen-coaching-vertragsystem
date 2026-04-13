@@ -101,17 +101,23 @@ def make_07(d):
     ])
 
 def make_04(d):
-    # Koordinaten aus echtem Output gemessen (pdfplumber auf generiertem PDF)
-    # Alle y-Werte = 841.89 - pdfplumber_top des tatsächlich gerenderten Textes
+    # Koordinaten aus echtem Output gemessen
+    # Straße/PLZ-Felder: erst weiße Box drüber (Vorausfüllung überschreiben), dann neu schreiben
+    # Straße-Rect: x0=57.4 top=176.7 bottom=198.9 → rl_y_bottom=643.0, h=22.2
+    # PLZ-Rect:    x0=307.1 gleiche Zeile
+    # P2 Datum: mit HH ausrichten → rl_y=453.9
     tp_mak = d.get("tp_mak_nr", "")
     fields = [
         (1,  57.4, 683.6, d["tp_vorname"],   10),
         (1, 307.1, 683.6, d["tp_nachname"],  10),
-        (1,  57.4, 646.0, d["tp_strasse"],   10),   # Straße-Feld (kein Messwert, +7.9 von 638.1)
+        # Straße: erst weiße Box (243 breit, 23 hoch), dann Text
+        (1,  57.4, 643.0, "",                10, 242, 23),   # weiße Abdeckung Straße
+        (1, 307.1, 643.0, "",                10, 242, 23),   # weiße Abdeckung PLZ
+        (1,  57.4, 646.0, d["tp_strasse"],   10),
         (1, 307.1, 646.0, d["tp_plz_ort"],   10),
         (1, 435.4, 601.3, tp_mak,             9),
         (1,  70.2, 495.7, tp_mak,             8),
-        (2, 177.0, 434.3, d["datum"],        10),
+        (2, 177.0, 453.9, d["datum"],        10),   # gleiche Höhe wie HH (top=388)
     ]
     return fill_overlay(PDFS["04"], fields)
 
@@ -125,7 +131,7 @@ def make_05(d):
         (1,  57.4, 545.7, d["tp_strasse"],   10),
         (1, 307.1, 545.7, d["tp_plz_ort"],   10),
         (2, 114.9, 559.8, prov,              10),
-        (2, 173.7, 110.4, d["datum"],        10),
+        (2, 173.7, 132.6, d["datum"],        10),   # gleiche Höhe wie HH (top=709.3)
         (2,  46.0,  68.5, d["tp_ort"],       10),
         (2, 173.7,  68.5, d["datum"],        10),
     ]
@@ -162,7 +168,7 @@ def make_03(d):
             c.setFont("Helvetica", 9)
             c.drawString(307.0, 520.2, d["tp_bic"])
             c.drawString(438.0, 520.2, d["tp_steuernummer"])
-            # Vermittler Datum: gleiche Höhe wie HH (rl_y=250.9)
+            # Vermittler Datum: gleiche Höhe wie HH (top=591.0, rl_y=250.9)
             c.setFont("Helvetica", 10)
             c.drawString(174.0, 250.9, d["datum"])
             # TG Ort + Datum
