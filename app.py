@@ -176,19 +176,24 @@ def make_06(d):
     ])
 
 def make_03(d):
-    # Formel: rl_y = 841.89 - line/rect.TOP - 3
-    # P1 MAK-Konto:    rect.top=158.4  → y=680.5
-    # P1 Name:         Linie top=228.0 → y=610.9
-    # P1 Straße/PLZ:   Linie top=257.7 → y=581.2
-    # P1 Kontoinhaber: Linie top=287.5 → y=551.4
-    # P1 IBAN:         rect.top=287.97 → y=550.9
-    # P1 Geldinstitut: Linie top=317.3 → y=521.6
-    # P1 BIC/Steuer:   rect.top=317.36 → y=521.5
-    # P1 Vermittler Datum: sign rect.top=586.9 → y=252.0
-    # P1 TG Ort/Datum:     sign rect.top=668.8 → y=170.1
-    # P2 Name:         rect.top=97.3   → y=741.6
-    # P2 Straße/PLZ:   rect.top=127.5  → y=711.4
-    # P2 TG sign:      rect.top=635.9  → y=203.0
+    # Korrekte Formel: code_y = 841.89 - frame.TOP - 12
+    # (Schrift rendert 7.9pt höher als angegeben, daher -12 statt -3)
+    #
+    # Page 1:
+    #   MAK-Konto:   rect.top=158.4  → y=671.5
+    #   Name/Vorn:   Linie top=228.0 → y=601.9
+    #   Straße/PLZ:  Linie top=257.7 → y=572.2
+    #   Kontoinhaber:Linie top=287.5 → y=542.4
+    #   IBAN:        rect top=288.0  → y=541.9
+    #   Geldinstitut:Linie top=317.3 → y=512.6
+    #   BIC/Steuer:  rect top=317.36 → y=512.5
+    #   Vermittler Datum: sign rect top=586.9 → y=243.0
+    #   TG Ort/Datum: sign rect top=668.8 → y=161.1
+    #
+    # Page 2:
+    #   Name:        rect top=97.3   → y=732.6
+    #   Straße/PLZ:  rect top=127.5  → y=702.4
+    #   TG sign:     rect top=635.9  → y=194.0
     reader = PdfReader(str(PDFS["03"]))
     writer = PdfWriter()
     for i, page in enumerate(reader.pages):
@@ -200,28 +205,28 @@ def make_03(d):
         if i == 0:
             mak = d.get("tp_mak_nr", "")
             if mak:
-                c.drawString(237.0, 680.5, mak)
-            c.drawString(55.0, 610.9, f"{d['tp_vorname']} {d['tp_nachname']}")
-            c.drawString(55.0, 581.2, d["tp_strasse"])
-            c.drawString(306.0, 581.2, d["tp_plz_ort"])
-            c.drawString(55.0, 551.4, f"{d['tp_vorname']} {d['tp_nachname']}")
+                c.drawString(237.0, 671.5, mak)
+            c.drawString(55.0, 601.9, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(55.0, 572.2, d["tp_strasse"])
+            c.drawString(306.0, 572.2, d["tp_plz_ort"])
+            c.drawString(55.0, 542.4, f"{d['tp_vorname']} {d['tp_nachname']}")
             c.setFont("Helvetica", 9)
-            c.drawString(307.0, 550.9, d["tp_iban"])
+            c.drawString(307.0, 541.9, d["tp_iban"])
             c.setFont("Helvetica", 10)
-            c.drawString(55.0, 521.6, d["tp_geldinstitut"])
+            c.drawString(55.0, 512.6, d["tp_geldinstitut"])
             c.setFont("Helvetica", 9)
-            c.drawString(307.0, 521.5, d["tp_bic"])
-            c.drawString(438.0, 521.5, d["tp_steuernummer"])
+            c.drawString(307.0, 512.5, d["tp_bic"])
+            c.drawString(438.0, 512.5, d["tp_steuernummer"])
             c.setFont("Helvetica", 10)
-            c.drawString(174.0, 244.0, d["datum"])   # Vermittler Datum: HH-aligned
-            c.drawString(46.0,  158.4, d["tp_ort"])
-            c.drawString(174.0, 158.4, d["datum"])
+            c.drawString(174.0, 243.0, d["datum"])
+            c.drawString(46.0,  161.1, d["tp_ort"])
+            c.drawString(174.0, 161.1, d["datum"])
         elif i == 1:
-            c.drawString(46.0,  741.6, f"{d['tp_vorname']} {d['tp_nachname']}")
-            c.drawString(46.0,  711.4, d["tp_strasse"])
-            c.drawString(301.3, 711.4, d["tp_plz_ort"])
-            c.drawString(46.0,  191.3, d["tp_ort"])
-            c.drawString(174.0, 191.3, d["datum"])
+            c.drawString(46.0,  732.6, f"{d['tp_vorname']} {d['tp_nachname']}")
+            c.drawString(46.0,  702.4, d["tp_strasse"])
+            c.drawString(301.3, 702.4, d["tp_plz_ort"])
+            c.drawString(46.0,  194.0, d["tp_ort"])
+            c.drawString(174.0, 194.0, d["datum"])
         c.save()
         packet.seek(0)
         overlay = PdfReader(packet)
